@@ -33,8 +33,8 @@ def womac_classification(data):
     count = len(womac)
 
     womac.sort()
-    range1 = womac[int(count / 4)]
-    range2 = womac[int(count * 3 / 4)]
+    range1 = womac[int(count / 10)]
+    range2 = womac[int(count * 9 / 10)]
 
     # print(data_copy.shape)
 
@@ -130,7 +130,7 @@ def select_dominant_col(data_fill_mode):
     data_corr = data_fill_mode.corr('kendall')['WOMAC']
     # print(data_corr)
 
-    corr_boundary = 0.35
+    corr_boundary = 0.1
 
     not_dominant_index = data_corr[(-corr_boundary < data_corr) & (data_corr < corr_boundary)].index
     # print(not_dominant_index)
