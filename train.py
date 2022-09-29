@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 
 from pipeline import pipeline
 
+
 def train(feature, label, feature_names, test_size=0.2, id=0, cls='entropy'):
     x_train, x_test, y_train, y_test = train_test_split(feature, label, test_size=test_size, shuffle=True)
 
@@ -23,6 +24,7 @@ def train(feature, label, feature_names, test_size=0.2, id=0, cls='entropy'):
     import os  
     os.environ['PATH'] = os.pathsep + r'D:\tools\code\Graphviz\bin'
     os.system(f'dot -Tpng ./results/out-{id}.dot -o ./results/决策树模型-{id}-accuracy-{s:.3f}.png')
+
 
 epochs = 10
 feature, label, feature_name = pipeline()
