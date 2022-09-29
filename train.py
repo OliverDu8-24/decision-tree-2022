@@ -4,8 +4,9 @@ from sklearn.model_selection import train_test_split
 
 from pipeline import pipeline
 
+
 def train(feature, label, feature_names, id=0, cls='entropy'):
-    x_train, x_test, y_train, y_test = train_test_split(feature, label, test_size=0.33, shuffle=True)
+    x_train, x_test, y_train, y_test = train_test_split(feature, label, test_size=0.25, shuffle=True)
 
     clf = tree.DecisionTreeClassifier(criterion=cls)
     clf.fit(x_train, y_train)
@@ -13,14 +14,14 @@ def train(feature, label, feature_names, id=0, cls='entropy'):
     s = clf.score(x_test, y_test)
     print(f"accuracy: {s}")
 
-    with open(f"./results/out-{id}.dot", 'w') as f :
+    with open(f"./results/out-{id}.dot", 'w') as f:
         f = tree.export_graphviz(clf, out_file=f,
                 feature_names=feature_names)
 
     dotdata = tree.export_graphviz(clf, out_file=f,
                 feature_names=feature_names)
 
-    import os  
+    import os
     os.environ['PATH'] = os.pathsep + r'D:\tools\code\Graphviz\bin'
     os.system(f'dot -Tpng ./results/out-{id}.dot -o ./results/决策树模型-{id}-accuracy-{s:.3f}.png')
 
