@@ -4,8 +4,8 @@ from sklearn.model_selection import train_test_split
 
 from pipeline import pipeline
 
-def train(feature, label, feature_names, id=0, cls='entropy'):
-    x_train, x_test, y_train, y_test = train_test_split(feature, label, test_size=0.33, shuffle=True)
+def train(feature, label, feature_names, test_size=0.2, id=0, cls='entropy'):
+    x_train, x_test, y_train, y_test = train_test_split(feature, label, test_size=test_size, shuffle=True)
 
     clf = tree.DecisionTreeClassifier(criterion=cls)
     clf.fit(x_train, y_train)
