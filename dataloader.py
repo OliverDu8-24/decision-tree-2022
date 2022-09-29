@@ -33,8 +33,8 @@ def womac_classification(data):
     count = len(womac)
 
     womac.sort()
-    range1 = womac[int(count / 4)]
-    range2 = womac[int(count * 3 / 4)]
+    range1 = womac[int(count * 1 / 10)]
+    range2 = womac[int(count * 9 / 10)]
 
     # print(data_copy.shape)
 
