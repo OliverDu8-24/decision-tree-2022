@@ -33,8 +33,8 @@ def womac_classification(data):
     count = len(womac)
 
     womac.sort()
-    range1 = womac[int(count * 1 / 10)]
-    range2 = womac[int(count * 9 / 10)]
+    range1 = womac[int(count / 4)]
+    range2 = womac[int(count * 3 / 4)]
 
     # print(data_copy.shape)
 
@@ -123,7 +123,23 @@ def process_by_feature_meaning(data_drop_row):
     # return data_drop_fillna
 
     # col_na_num = have_null(data_fill_mode).get("col_sum")
-    # col_na_num.to_csv('/blank_column.csv')
+    # col_na_num.to_csv('blank_column.csv')
+
+
+def select_dominant_col(data_fill_mode):
+    data_corr = data_fill_mode.corr('kendall')['WOMAC']
+    # print(data_corr)
+
+    corr_boundary = 0.35
+
+    not_dominant_index = data_corr[(-corr_boundary < data_corr) & (data_corr < corr_boundary)].index
+    # print(not_dominant_index)
+
+    data_select_dom = data_fill_mode.drop(not_dominant_index, axis=1, inplace=False)
+
+    data_select_dom.to_csv('phase_1_reduced.csv')
+
+    return data_select_dom
 
 
 def get_train_data(data_fill_mode):
