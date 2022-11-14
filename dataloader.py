@@ -52,13 +52,12 @@ def clean_mostly_null_data(data, col_threshold=1300, row_threshold=200):
 
 def process_by_feature_meaning(data_drop_row):
     # 按特征含义处理剩余缺省值
-    # TODO 确认每一列的具体含义，制定不同的处理方案
 
     # print(f"now data shape: {data_drop_row.shape}")
 
     # delete useless columns (unrelated, repeated)
     useless_col_index = data_drop_row\
-        .filter(regex='^(q\\w+|fs1q3\\w|fs2ct\\w+)')\
+        .filter(regex='^(q\\w+|fs1q3\\w|fs2ct\\w+|fs1q5|fs1q6|fs1c1e\\w|fs1c1f\\w)')\
         .columns
     data_drop_useless = data_drop_row.drop(useless_col_index, axis=1, inplace=False)
 
@@ -66,24 +65,41 @@ def process_by_feature_meaning(data_drop_row):
 
 
 def fill_missing_data(data):
-    data_np = KNN(k=3).fit_transform(data)
-    data_pd = pd.DataFrame(data_np, columns=data.columns)
+    print(f"before fill: {data.shape}")
+    # for important feature, mark missing value as "unknown"
+    important_col_index = data \
+        .filter(regex='WOMAC|slope|'
+                      'fs1q2|fs1q4|fs1c1c\\w+|fs1c1d\\w+|fs1c[2-8]\\w+|fs1d3|fs1e1|fs1ct\\w+|'
+                      'fs2a7|fs2a8|fs2b3|fs2c1') \
+        .columns
+    data_important = data.loc[:, important_col_index]
+    data_important.fillna('-1000000.0', inplace=True)   # refers to unknown
+
+    print(data_important.shape)
+
+    # for other feature, use KNN to fill missing value
+    data_other = data.drop(important_col_index, axis=1, inplace=False)
+    data_np = KNN(k=3).fit_transform(data_other)
+    data_pd = pd.DataFrame(data_np, columns=data_other.columns)
     data_pd = data_pd.round(1)
 
-    # print(dataset.isna().sum())
-    # print(data_pd.isna().sum())
+    print(data_pd.shape)
 
-    return data_pd
+    data_concat = pd.concat([data_important, data_pd], axis=1, join='inner')
+    data_concat = data_concat.iloc[0:1345, :]
+
+    print(f"after fill: {data_concat.shape}")
+
+    return data_concat
 
 
-def set_label(data, threshold=2.7):
-    data['label'] = data['slope'].apply(lambda x: 1 if x > threshold else 0)
-
+def set_label(data, slope_threshold):
+    data['label'] = data['slope'].apply(lambda x: 1 if x > slope_threshold else 0)
     return data
 
 
-def select_dominant_col(data, corr_boundary=0.08):
-    data_corr = data.corr('kendall')['label']
+def select_dominant_col(data, corr_boundary):
+    data_corr = data.corr('spearman')['label']
     data_corr = data_corr.abs().sort_values(ascending=False)
 
     data_corr.to_csv('corr.csv')
@@ -96,11 +112,25 @@ def select_dominant_col(data, corr_boundary=0.08):
     return data_select_dom
 
 
+def select_essential_col(data):
+    important_col_index = data \
+        .filter(regex='WOMAC|slope|label|'
+                      'fs1q2|fs1q4|fs1c1c\\w+|fs1c1d\\w+|fs1c[2-8]\\w+|fs1d3|fs1e1|fs1ct\\w+|'
+                      'fs2a7|fs2a8|fs2b3|fs2c1') \
+        .columns
+    data_important = data.loc[:, important_col_index]
+
+    # data_important.to_csv('data/phase_12_generated.csv', index=False)
+
+    return data_important
+
+
 def get_train_data(data):
     feature = data.drop(['WOMAC_02', 'WOMAC_03', 'slope', 'label'], axis=1, inplace=False)
     label = data['label'].values
     # label_name = ['front', 'middle', 'end']
+
     feature_name = feature.columns
-    print(feature_name)
+    # print(feature_name)
 
     return feature, label, feature_name
